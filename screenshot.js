@@ -6,34 +6,30 @@ const url = process.argv[2];
 const timeout = 8000;
 
 (async () => {
-    const browser = await puppeteer.launch( {
-        headless: "new",
-    } );
+    const browser = await puppeteer.launch({
+        headless: false, // or false if you want to see the browser
+    });
 
     const page = await browser.newPage();
 
-    await page.setViewport( {
+    await page.setViewport({
         width: 1200,
         height: 1200,
         deviceScaleFactor: 1,
-    } );
+    });
 
-    setTimeout(async () => {
-        await page.screenshot( {
-            path: "screenshot.jpg",
-            fullPage: true,
-        } );
-    }, timeout-2000);
-
-    await page.goto( url, {
+    await page.goto(url, {
         waitUntil: "networkidle0",
         timeout: timeout,
-    } );
+    });
 
-    await page.screenshot( {
+    // Wait for additional time if needed, then take the screenshot
+    await page.waitForTimeout(timeout - 2000);
+
+    await page.screenshot({
         path: "screenshot.jpg",
         fullPage: true,
-    } );
+    });
 
     await browser.close();
 })();

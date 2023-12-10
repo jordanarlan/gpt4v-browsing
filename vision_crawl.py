@@ -2,7 +2,7 @@ from openai import OpenAI
 import subprocess
 import base64
 import json
-import os
+import os 
 
 model = OpenAI()
 model.timeout = 10
