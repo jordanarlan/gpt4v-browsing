@@ -49,7 +49,7 @@ while True:
             os.remove("screenshot.jpg")
 
         result = subprocess.run(
-            ["node", "screenshot.js", url],
+            ["node", "screenshot.cjs", url],
             capture_output=True,
             text=True
         )
