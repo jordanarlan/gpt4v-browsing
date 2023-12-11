@@ -1,10 +1,8 @@
 from openai import OpenAI
 import json
 import logging
-from importlib.machinery import SourceFileLoader
-import pandas as pd
-from api import get_filtered_results
 from open_ai import get_openai_response
+import pandas as pd
 
 # Setting up logging to handle info, warning, and error messages.
 logging.basicConfig(level=logging.INFO)
@@ -12,6 +10,16 @@ logging.basicConfig(level=logging.INFO)
 # Initialize the OpenAI model with a timeout of 10 seconds.
 model = OpenAI()
 model.timeout = 10
+
+def read_bungie_news_from_csv(filename='bungie_news.csv'):
+    try:
+        df = pd.read_csv(filename)
+        print(f"Data loaded from {filename}")
+        return df
+    except FileNotFoundError:
+        print(f"File {filename} not found. Ensure the file exists or run the data retrieval script.")
+        return None
+    
 def format_df_for_llm(df):
     """
     Converts the DataFrame into a string format suitable for the language model.
@@ -28,7 +36,7 @@ def main():
     prompt = input("You: ")
 
     # Get the filtered results from the API
-    df = get_filtered_results()
+    df = read_bungie_news_from_csv()
 
     # Format the DataFrame for LLM
     df_str = format_df_for_llm(df)

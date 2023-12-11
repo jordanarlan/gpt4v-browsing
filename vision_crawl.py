@@ -211,7 +211,7 @@ def main():
                 messages=[
                     {
                         "role": "system",
-                        "content": "Your job is to answer the user's question based on the given screenshot...",
+                        "content": "Your job is to answer the user's question based on the given screenshot of a website. Answer the user as an assistant, but don't tell that the information is from a screenshot or an image. Pretend it is information that you know. If you can't answer the question, simply respond with the code `ANSWER_NOT_FOUND` and nothing else.",
                     }
                 ] + messages[1:],
                 max_tokens=1024,

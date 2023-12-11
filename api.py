@@ -59,3 +59,12 @@ def get_filtered_results():
     df['Link'] = df['Link'].apply(lambda x: base_url + x)
 
     return df
+
+df = get_filtered_results()
+
+def save_to_csv(df, filename='bungie_news.csv'):
+    # Save DataFrame to CSV
+    df.to_csv(filename, index=False)
+    print(f"Data saved to {filename}")
+
+save_to_csv(df)

@@ -3,8 +3,8 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
 const url = process.argv[2];
-const pageLoadTimeout = 20000; // 30 seconds for page load
-const extraWaitTime = 5000; // 5 seconds extra wait after page load
+const pageLoadTimeout = 30000; // 30 seconds for page load
+const extraWaitTime = 10000; // 10 seconds extra wait after page load
 
 (async () => {
     try {
