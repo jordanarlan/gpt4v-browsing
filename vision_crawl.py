@@ -4,9 +4,73 @@ import base64
 import json
 import os
 import logging
+import requests
+from importlib.machinery import SourceFileLoader
+import pandas as pd
 
 # Setting up logging to handle info, warning, and error messages.
 logging.basicConfig(level=logging.INFO)
+
+import requests
+import os
+from importlib.machinery import SourceFileLoader
+import pandas as pd
+
+
+try:
+    config = SourceFileLoader("config", "config.py").load_module()
+
+    bungie_api_key = config.BUNGIE_API_KEY
+    endpoint = "https://www.bungie.net/Platform/Content/Rss/NewsArticles/{pageToken}/"
+    page_token = "0"
+    include_body = True
+    headers = {
+        "X-API-Key": bungie_api_key
+    }
+    params = {
+        "includebody": include_body
+    }
+
+    results = []
+
+    while page_token is not None:
+        response = requests.get(endpoint.format(pageToken=page_token), headers=headers, params=params)
+
+        if response.status_code == 200:
+            json_response = response.json()
+            if 'NewsArticles' in json_response['Response']:
+                results.extend(json_response['Response']['NewsArticles'])
+            else:
+                print("No NewsArticles found in the response.")
+                break
+            page_token = json_response['Response']['NextPaginationToken']
+        else:
+            print("Error:", response.status_code)
+            print("Response:", response.text)
+            break
+except Exception as e:
+    print("An error occurred:", str(e))
+    
+# Desired keys
+keys = ['Title', 'Link', 'PubDate', 'Description']
+
+# Filtering the results
+filtered_results = [{key: item[key] for key in keys} for item in results]
+
+# Convert the filtered list into a DataFrame
+df = pd.DataFrame(filtered_results)
+
+import re
+pattern = r'Update|Hotfix'
+df = df[df['Title'].str.contains(pattern, regex=True, flags=re.IGNORECASE)]
+df = df.iloc[0:25].reset_index()
+# Print the filtered DataFrame
+
+base_url = "https://www.bungie.net"
+
+# Prepending the base URL to each 'Link' in the DataFrame
+df['Link'] = df['Link'].apply(lambda x: base_url + x)
+
 
 # Initialize the OpenAI model with a timeout of 10 seconds.
 model = OpenAI()
@@ -45,6 +109,15 @@ def take_screenshot(url):
     except Exception as e:
         logging.error(f"Error taking screenshot: {e}")
         return None, None
+    
+def format_df_for_llm(df):
+    """
+    Converts the DataFrame into a string format suitable for the language model.
+    """
+    formatted_str = "Here are the recent updates for Destiny 2:\n"
+    for _, row in df.iterrows():
+        formatted_str += f"Title: {row['Title']}, Link: {row['Link']}, Date: {row['PubDate']}, Description: {row['Description']}\n"
+    return formatted_str
 
 def main():
     """
@@ -52,17 +125,24 @@ def main():
     """
     prompt = input("You: ")
 
+    # Format the DataFrame for LLM
+    df_str = format_df_for_llm(df)
+
     messages = [
         {
             "role": "system",
-            "content": "You are a web crawler. Your job is to give the user a URL in JSON format. Respond in the following JSON format: {\"url\": \"<put url here>\"}",
+            "content": "You are a language model assisting with selecting relevant links from a dataset. Your job is to give the user a URL in JSON format. Respond in the following JSON format: {\"url\": \"<put url here>\"}",
         },
         {
             "role": "user",
             "content": prompt,
+        },
+        {
+            "role": "assistant",
+            "content": df_str,
         }
     ]
-
+    
     while True:
         # Try to get a response from the OpenAI model.
         try:
