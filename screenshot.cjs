@@ -3,13 +3,15 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
 const url = process.argv[2];
-const pageLoadTimeout = 30000; // 30 seconds for page load
-const extraWaitTime = 10000; // 10 seconds extra wait after page load
+const pageLoadTimeout = 10000; // 10 seconds for page load
+const extraWaitTime = 5000; // 5 seconds extra wait after page load
 
 (async () => {
+    let browser; // Declare browser outside of the try-catch block
+
     try {
-        const browser = await puppeteer.launch({
-            headless: true, // Set to false to see the browser
+        browser = await puppeteer.launch({
+            headless: false, // Set to false to see the browser
             args: ['--no-sandbox', '--disable-setuid-sandbox'], // Added for better stability in different environments
         });
 
@@ -38,6 +40,8 @@ const extraWaitTime = 10000; // 10 seconds extra wait after page load
     } catch (error) {
         console.error("An error occurred:", error);
     } finally {
-        await browser.close();
+        if (browser) {
+            await browser.close();
+        }
     }
 })();

@@ -11,11 +11,6 @@ import pandas as pd
 # Setting up logging to handle info, warning, and error messages.
 logging.basicConfig(level=logging.INFO)
 
-import requests
-import os
-from importlib.machinery import SourceFileLoader
-import pandas as pd
-
 
 try:
     config = SourceFileLoader("config", "config.py").load_module()
